@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ご注文内容の確認 – VitalBoost</title>
+
+  <!-- ▼ Google Tag Manager をここに設置 -->
+  <!-- GTM スニペット（head用）をここに貼り付けてください -->
+  <!-- ▲ Google Tag Manager -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --sage:    #4a7c59;
+      --sage-lt: #6fa080;
+      --sage-bg: #f0f7f2;
+      --teal:    #2d6a7a;
+      --teal-lt: #e8f4f7;
+      --cream:   #fafaf7;
+      --stone:   #e8e4dc;
+      --ink:     #1a2420;
+      --muted:   #6b7b73;
+      --error:   #c0392b;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
+
+    header {
+      background: rgba(250,250,247,.95); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--stone); padding: 14px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 700; color: var(--sage); text-decoration: none; }
+    .logo span { color: var(--teal); }
+    .step-nav { display: flex; align-items: center; font-size: .78rem; }
+    .step { display: flex; align-items: center; gap: 8px; padding: 6px 16px; color: var(--muted); }
+    .step.active { color: var(--sage); font-weight: 500; }
+    .step.done { color: var(--sage); font-weight: 500; }
+    .step .num { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid currentColor; display: flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 600; }
+    .step.active .num { background: var(--sage); border-color: var(--sage); color: #fff; }
+    .step.done .num { background: var(--sage-bg); border-color: var(--sage); color: var(--sage); }
+    .step-sep { color: var(--stone); font-size: 1rem; padding: 0 4px; }
+
+    main {
+      max-width: 960px; margin: 48px auto; padding: 0 24px;
+      display: grid; grid-template-columns: 1fr 360px; gap: 32px; align-items: start;
+    }
+
+    .form-section h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; }
+    .section-desc { font-size: .85rem; color: var(--muted); margin-bottom: 32px; }
+    .field-group { margin-bottom: 22px; }
+    label { display: block; font-size: .78rem; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    label .req { color: var(--sage); margin-left: 3px; }
+    input[type="text"], input[type="email"] {
+      width: 100%; padding: 14px 16px; border: 1.5px solid var(--stone); border-radius: 8px;
+      background: #fff; font-family: 'DM Sans', sans-serif; font-size: .95rem; color: var(--ink);
+      outline: none; transition: border-color .2s, box-shadow .2s;
+    }
+    input:focus { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(74,124,89,.12); }
+    input.error-field { border-color: var(--error); box-shadow: 0 0 0 3px rgba(192,57,43,.1); }
+    .error-msg { display: none; font-size: .75rem; color: var(--error); margin-top: 6px; }
+    .error-msg.show { display: block; }
+
+    .submit-btn {
+      width: 100%; padding: 18px; background: var(--sage); color: #fff;
+      border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif;
+      font-size: 1rem; font-weight: 500; letter-spacing: .04em; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      transition: transform .2s, box-shadow .2s, background .2s;
+      margin-top: 32px; position: relative; overflow: hidden;
+    }
+    .submit-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,.12), transparent); }
+    .submit-btn:hover { background: var(--sage-lt); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(74,124,89,.3); }
+    .submit-btn:active { transform: translateY(0); }
+    .submit-btn:disabled { opacity: .7; cursor: not-allowed; transform: none; box-shadow: none; }
+    .secure-note { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: .75rem; color: var(--muted); margin-top: 14px; }
+    .secure-note svg { color: var(--teal); }
+
+    .order-summary { background: #fff; border: 1px solid var(--stone); border-radius: 16px; overflow: hidden; position: sticky; top: 90px; }
+    .summary-header { background: var(--sage-bg); padding: 20px 24px; border-bottom: 1px solid rgba(74,124,89,.15); }
+    .summary-header h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 700; color: var(--ink); }
+    .summary-body { padding: 24px; }
+    .order-item { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 20px; }
+    .item-thumb { width: 56px; height: 72px; background: linear-gradient(160deg, var(--sage-bg), var(--teal-lt)); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .mini-pills { display: flex; flex-direction: column; gap: 4px; }
+    .mp { width: 22px; height: 8px; border-radius: 100px; background: var(--sage); }
+    .mp.s { width: 14px; align-self: center; }
+    .item-info h4 { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+    .item-info p { font-size: .78rem; color: var(--muted); margin-bottom: 6px; }
+    .item-qty { display: inline-block; background: var(--sage-bg); color: var(--sage); font-size: .72rem; font-weight: 500; padding: 3px 8px; border-radius: 4px; }
+    .item-price { margin-left: auto; font-weight: 500; font-size: .95rem; }
+    .summary-divider { border: none; border-top: 1px solid var(--stone); margin: 0 0 16px; }
+    .summary-row { display: flex; justify-content: space-between; font-size: .85rem; color: var(--muted); margin-bottom: 10px; }
+    .summary-row.total { font-size: 1.1rem; font-weight: 500; color: var(--ink); margin-top: 12px; padding-top: 12px; border-top: 1.5px solid var(--stone); }
+    .summary-row.total span:last-child { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 700; color: var(--sage); }
+    .free-badge { background: var(--teal-lt); color: var(--teal); font-size: .72rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+
+    @media (max-width: 760px) {
+      main { grid-template-columns: 1fr; }
+      .order-summary { position: static; }
+      header { padding: 14px 20px; }
+      .step-nav { display: none; }
+    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    main { animation: fadeUp .5s ease both; }
+  </style>
+</head>
+<body>
+
+<!-- ▼ Google Tag Manager (noscript) をここに設置 -->
+<!-- <noscript>GTM noscript をここに貼り付けてください</noscript> -->
+<!-- ▲ Google Tag Manager (noscript) -->
+
+<header>
+  <a href="index.html" class="logo">Vital<span>Boost</span></a>
+  <div class="step-nav">
+    <div class="step done"><span class="num">✓</span><span>商品選択</span></div>
+    <span class="step-sep">›</span>
+    <div class="step active"><span class="num">2</span><span>お届け情報</span></div>
+    <span class="step-sep">›</span>
+    <div class="step"><span class="num">3</span><span>完了</span></div>
+  </div>
+</header>
+
+<main>
+  <section class="form-section">
+    <h2>お届け情報の入力</h2>
+    <p class="section-desc">以下の項目をすべてご入力のうえ、注文を確定してください。</p>
+    <div id="checkout-form">
+      <div class="field-group">
+        <label for="name">お名前 <span class="req">*</span></label>
+        <input type="text" id="name" placeholder="山田 太郎" required>
+        <p class="error-msg" id="name-err">お名前を入力してください。</p>
+      </div>
+      <div class="field-group">
+        <label for="address">住所 <span class="req">*</span></label>
+        <input type="text" id="address" placeholder="東京都渋谷区〇〇町1-2-3" required>
+        <p class="error-msg" id="address-err">住所を入力してください。</p>
+      </div>
+      <div class="field-group">
+        <label for="email">メールアドレス <span class="req">*</span></label>
+        <input type="email" id="email" placeholder="example@email.com" required>
+        <p class="error-msg" id="email-err">メールアドレスを入力してください。</p>
+      </div>
+      <button class="submit-btn" id="submit-btn" type="button">
+        注文を確定する
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+      <p class="secure-note">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        SSL暗号化通信で保護されています
+      </p>
+    </div>
+  </section>
+
+  <aside class="order-summary">
+    <div class="summary-header"><h3>ご注文内容</h3></div>
+    <div class="summary-body">
+      <div class="order-item">
+        <div class="item-thumb">
+          <div class="mini-pills">
+            <div class="mp"></div><div class="mp s"></div><div class="mp"></div>
+          </div>
+        </div>
+        <div class="item-info">
+          <h4>VitalBoost</h4>
+          <p>60カプセル / 1ヶ月分</p>
+          <span class="item-qty">数量：1個</span>
+        </div>
+        <span class="item-price">¥3,000</span>
+      </div>
+      <hr class="summary-divider">
+      <div class="summary-row"><span>小計</span><span>¥3,000</span></div>
+      <div class="summary-row"><span>配送料</span><span class="free-badge">無料</span></div>
+      <div class="summary-row total"><span>合計（税込）</span><span>¥3,000</span></div>
+    </div>
+  </aside>
+</main>
+
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  // add_payment_info: 初回フォーカス時のみ発火
+  var paymentInfoFired = false;
+  document.querySelectorAll('input').forEach(function(input) {
+    input.addEventListener('focus', function() {
+      if (!paymentInfoFired) {
+        paymentInfoFired = true;
+        dataLayer.push({ 'event': 'add_payment_info' });
+      }
+    });
+  });
+
+  // フォーム送信処理
+  document.getElementById('submit-btn').addEventListener('click', function() {
+    var nameVal    = document.getElementById('name').value.trim();
+    var addressVal = document.getElementById('address').value.trim();
+    var emailVal   = document.getElementById('email').value.trim();
+    var valid = true;
+
+    if (!nameVal) {
+      document.getElementById('name').classList.add('error-field');
+      document.getElementById('name-err').classList.add('show');
+      valid = false;
+    } else {
+      document.getElementById('name').classList.remove('error-field');
+      document.getElementById('name-err').classList.remove('show');
+    }
+    if (!addressVal) {
+      document.getElementById('address').classList.add('error-field');
+      document.getElementById('address-err').classList.add('show');
+      valid = false;
+    } else {
+      document.getElementById('address').classList.remove('error-field');
+      document.getElementById('address-err').classList.remove('show');
+    }
+    if (!emailVal) {
+      document.getElementById('email').classList.add('error-field');
+      document.getElementById('email-err').classList.add('show');
+      valid = false;
+    } else {
+      document.getElementById('email').classList.remove('error-field');
+      document.getElementById('email-err').classList.remove('show');
+    }
+
+    if (!valid) return;
+
+    // place_an_order イベント発火
+    dataLayer.push({ 'event': 'place_an_order' });
+
+    // ボタン無効化（二重送信防止）
+    var btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = '処理中…';
+
+    // 0.5秒待機してから thankyou.html へ遷移
+    setTimeout(function() {
+      window.location.href = 'thankyou.html';
+    }, 500);
+  });
+</script>
+</body>
+</html>

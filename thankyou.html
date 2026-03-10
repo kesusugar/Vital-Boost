@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ご注文完了 – VitalBoost</title>
+
+  <!-- ▼ Google Tag Manager をここに設置 -->
+  <!-- GTM スニペット（head用）をここに貼り付けてください -->
+  <!-- ▲ Google Tag Manager -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --sage:    #4a7c59;
+      --sage-lt: #6fa080;
+      --sage-bg: #f0f7f2;
+      --teal:    #2d6a7a;
+      --teal-lt: #e8f4f7;
+      --cream:   #fafaf7;
+      --stone:   #e8e4dc;
+      --ink:     #1a2420;
+      --muted:   #6b7b73;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; display: flex; flex-direction: column; }
+
+    header {
+      background: rgba(250,250,247,.95); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--stone); padding: 14px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 700; color: var(--sage); text-decoration: none; }
+    .logo span { color: var(--teal); }
+    .step-nav { display: flex; align-items: center; font-size: .78rem; }
+    .step { display: flex; align-items: center; gap: 8px; padding: 6px 16px; color: var(--muted); }
+    .step.done { color: var(--sage); font-weight: 500; }
+    .step .num { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid currentColor; display: flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 600; }
+    .step.done .num { background: var(--sage); border-color: var(--sage); color: #fff; }
+    .step-sep { color: var(--stone); font-size: 1rem; padding: 0 4px; }
+
+    main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 60px 24px; }
+
+    .thankyou-card {
+      background: #fff; border: 1px solid var(--stone); border-radius: 24px;
+      max-width: 600px; width: 100%; text-align: center; overflow: hidden;
+      animation: scaleIn .6s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    .card-top {
+      background: linear-gradient(135deg, var(--sage-bg) 0%, var(--teal-lt) 100%);
+      padding: 48px 40px 40px; position: relative; overflow: hidden;
+    }
+    .card-top::before {
+      content: ''; position: absolute; width: 300px; height: 300px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(74,124,89,.1) 0%, transparent 70%);
+      top: -80px; right: -60px;
+    }
+    .confetti-wrap { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; animation: fall 1s ease-out both; }
+    @keyframes fall {
+      from { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      to   { transform: translateY(120px) rotate(360deg); opacity: 0; }
+    }
+
+    .check-wrap { width: 80px; height: 80px; margin: 0 auto 28px; }
+    .check-circle {
+      width: 80px; height: 80px; border-radius: 50%; background: var(--sage);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 24px rgba(74,124,89,.35);
+      animation: popIn .5s .2s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    .check-icon { stroke-dasharray: 30; stroke-dashoffset: 30; animation: drawCheck .4s .7s ease forwards; }
+    @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes drawCheck { to { stroke-dashoffset: 0; } }
+
+    .card-top h1 { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 700; color: var(--ink); margin-bottom: 12px; animation: fadeUp .5s .4s ease both; }
+    .card-top p { font-size: .95rem; color: var(--muted); line-height: 1.7; animation: fadeUp .5s .5s ease both; }
+
+    .card-body { padding: 32px 40px 40px; }
+    .order-details { background: var(--sage-bg); border-radius: 12px; padding: 20px 24px; margin-bottom: 28px; animation: fadeUp .5s .6s ease both; }
+    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: .88rem; }
+    .detail-row + .detail-row { border-top: 1px solid rgba(74,124,89,.15); }
+    .detail-row .label { color: var(--muted); }
+    .detail-row .value { font-weight: 500; color: var(--ink); }
+    .detail-row.total .value { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 700; color: var(--sage); }
+    .order-id { font-size: .75rem; color: var(--muted); margin-bottom: 28px; animation: fadeUp .5s .65s ease both; }
+    .order-id span { font-weight: 500; color: var(--teal); letter-spacing: .04em; }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--sage); font-weight: 500; font-size: .9rem;
+      text-decoration: none; padding: 12px 24px;
+      border: 1.5px solid var(--sage); border-radius: 8px;
+      transition: background .2s, color .2s, transform .2s;
+      animation: fadeUp .5s .7s ease both;
+    }
+    .back-btn:hover { background: var(--sage); color: #fff; transform: translateY(-1px); }
+    .back-btn svg { transition: transform .2s; }
+    .back-btn:hover svg { transform: translateX(-3px); }
+
+    footer { background: var(--ink); color: rgba(255,255,255,.4); text-align: center; padding: 24px; font-size: .78rem; }
+    footer span { color: var(--sage-lt); }
+
+    @keyframes scaleIn { from { opacity: 0; transform: scale(.94) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 600px) {
+      .card-top, .card-body { padding: 36px 24px; }
+      header { padding: 14px 20px; }
+      .step-nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ▼ Google Tag Manager (noscript) をここに設置 -->
+<!-- <noscript>GTM noscript をここに貼り付けてください</noscript> -->
+<!-- ▲ Google Tag Manager (noscript) -->
+
+<header>
+  <a href="index.html" class="logo">Vital<span>Boost</span></a>
+  <div class="step-nav">
+    <div class="step done"><span class="num">✓</span><span>商品選択</span></div>
+    <span class="step-sep">›</span>
+    <div class="step done"><span class="num">✓</span><span>お届け情報</span></div>
+    <span class="step-sep">›</span>
+    <div class="step done"><span class="num">✓</span><span>完了</span></div>
+  </div>
+</header>
+
+<main>
+  <div class="thankyou-card">
+    <div class="card-top">
+      <div class="confetti-wrap" id="confetti"></div>
+      <div class="check-wrap">
+        <div class="check-circle">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline class="check-icon" points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+      </div>
+      <h1>ご注文ありがとうございました！</h1>
+      <p>ご注文が正常に受け付けられました。<br>ご登録のメールアドレスに確認メールをお送りいたします。</p>
+    </div>
+    <div class="card-body">
+      <div class="order-details">
+        <div class="detail-row"><span class="label">商品</span><span class="value">VitalBoost × 1</span></div>
+        <div class="detail-row"><span class="label">配送料</span><span class="value">無料</span></div>
+        <div class="detail-row total"><span class="label">お支払い合計</span><span class="value">¥3,000</span></div>
+      </div>
+      <p class="order-id">注文番号：<span id="order-id-display">VBST---------</span></p>
+      <a href="index.html" class="back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        トップページへ戻る
+      </a>
+    </div>
+  </div>
+</main>
+
+<footer>© 2025 <span>VitalBoost</span> — このサイトはタグ発火テスト用のデモサイトです。</footer>
+
+<script>
+  window.dataLayer = window.dataLayer || [];
+  dataLayer.push({ 'event': 'purchase', 'value': 3000, 'currency': 'JPY' });
+
+  // 注文番号をランダム生成（テスト用）
+  var orderId = 'VBST-' + Date.now().toString(36).toUpperCase();
+  document.getElementById('order-id-display').textContent = orderId;
+
+  // 紙吹雪エフェクト
+  var colors = ['#4a7c59','#2d6a7a','#c8a96e','#6fa080','#a8d5b5'];
+  var wrap = document.getElementById('confetti');
+  for (var i = 0; i < 28; i++) {
+    var dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.style.background = colors[i % colors.length];
+    dot.style.left = (Math.random() * 100) + '%';
+    dot.style.top = (Math.random() * 40) + '%';
+    dot.style.animationDelay = (Math.random() * .6) + 's';
+    dot.style.animationDuration = (.8 + Math.random() * .6) + 's';
+    dot.style.width = dot.style.height = (5 + Math.random() * 7) + 'px';
+    wrap.appendChild(dot);
+  }
+</script>
+</body>
+</html>
